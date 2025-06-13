@@ -76,7 +76,7 @@ export default function App() {
             component={GerenciarAssinaturas}
             options={{
               title: 'Nova Assinatura',
-              headerStyle: { backgroundColor: '#11182' },
+              headerStyle: { backgroundColor: '#111827' },
               headerTintColor: '#F9FAFB',
               headerTitleStyle: { fontWeight: 'bold' },
             }}

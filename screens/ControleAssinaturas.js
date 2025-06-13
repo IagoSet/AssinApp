@@ -101,7 +101,7 @@ function GerenciarAssinaturas({ route, navigation }) {
           style={styles.input}
           maxLength={20}
           value={descricao}
-          placeholder="Ex: Supermercado"
+          placeholder="Ex: Spotify, Netflix"
           placeholderTextColor="#94A3B8"
           onChangeText={setDescricao}
         />
