@@ -10,6 +10,7 @@ function GerenciarAssinaturas({ route, navigation }) {
   const [data, setData] = useState(new Date());
   const [valor, setValor] = useState('');
   const [descricao, setDescricao] = useState('');
+  const [categoria, setCategoria] = useState('');
   const [showPicker, setShowPicker] = useState(false);
 
   const { uid } = useContext(AuthContext);
@@ -21,18 +22,21 @@ function GerenciarAssinaturas({ route, navigation }) {
   };
 
   const handleChangeValor = (text) => {
-    const cleanText = text.replace(',', '.');
-    const match = cleanText.match(/^\d*\.?\d{0,2}$/);
-    if (match) {
-      setValor(cleanText);
-    }
+    const onlyNumbers = text.replace(/[^\d]/g, '');
+    const number = parseFloat(onlyNumbers) / 100;
+    const formatted = number.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+    setValor(formatted);
   };
 
   async function addAssinaturas() {
     try {
       await addDoc(collection(db, uid), {
         descricao,
-        valor: parseFloat(valor),
+        categoria,
+        valor,
         data,
       });
       Alert.alert('Sucesso', 'Assinatura cadastrada com sucesso!');
@@ -48,7 +52,8 @@ function GerenciarAssinaturas({ route, navigation }) {
       const assinaturasRef = doc(db, uid, assinaturasId);
       await updateDoc(assinaturasRef, {
         descricao,
-        valor: parseFloat(valor),
+        categoria,
+        valor,
         data,
       });
       Alert.alert('Sucesso', 'Assinatura atualizada com sucesso!');
@@ -62,7 +67,7 @@ function GerenciarAssinaturas({ route, navigation }) {
   async function removerAssinaturas() {
     try {
       const assinaturasRef = doc(db, uid, assinaturasId);
-      await deleteDoc(assinaturasaRef);
+      await deleteDoc(assinaturasRef);
       Alert.alert('Sucesso', 'Assinatura removida com sucesso!');
       navigation.goBack();
     } catch (error) {
@@ -77,7 +82,14 @@ function GerenciarAssinaturas({ route, navigation }) {
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
         setDescricao(snapshot.data().descricao);
-        setValor(String(snapshot.data().valor));
+        setCategoria(snapshot.data().categoria || '');
+        setValor(snapshot.data().valor
+          ? snapshot.data().valor.toLocaleString('pt-BR', {
+              style: 'currency',
+              currency: 'BRL',
+            })
+          : ''
+        );
         setData(snapshot.data().data.toDate());
       } else {
         console.log('Nenhum documento encontrado!');
@@ -108,11 +120,23 @@ function GerenciarAssinaturas({ route, navigation }) {
       </View>
 
       <View style={styles.inputContainer}>
+        <Text style={styles.label}>Categoria</Text>
+        <TextInput
+          style={styles.input}
+          maxLength={20}
+          value={categoria}
+          placeholder="Ex: Streaming, Música, Jogos"
+          placeholderTextColor="#94A3B8"
+          onChangeText={setCategoria}
+        />
+      </View>
+
+      <View style={styles.inputContainer}>
         <Text style={styles.label}>Valor das Assinaturas</Text>
         <TextInput
           style={styles.input}
-          keyboardType={'decimal-pad'}
-          maxLength={10}
+          keyboardType={'numeric'}
+          maxLength={12}
           value={valor}
           placeholder="R$ 0,00"
           placeholderTextColor="#94A3B8"
