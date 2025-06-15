@@ -9,13 +9,13 @@ function AssinaturasRecentes() {
   const [assinaturas, setAssinaturas] = useState([]);
 
   function filtrarUltimos7Dias(lista) {
-    const hoje = new Date().getTime();
+    const hoje = Date.now();
     const seteDiasAtras = new Date();
-    seteDiasAtras.setDate(new Date().getDate() - 7);
+    seteDiasAtras.setDate(seteDiasAtras.getDate() - 7);
     const limite = seteDiasAtras.getTime();
 
     return lista.filter((item) => {
-      const data = item.data?.getTime?.();
+      const data = item.data instanceof Date ? item.data.getTime() : null;
       return data && data >= limite && data <= hoje;
     });
   }
@@ -24,12 +24,15 @@ function AssinaturasRecentes() {
     if (!uid) return;
 
     const unsubscribe = onSnapshot(collection(db, uid), (snapshot) => {
-      const listaAssinaturas = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        descricao: doc.data().descricao,
-        valor: doc.data().valor,
-        data: doc.data().data?.toDate?.() || new Date(),
-      }));
+      const listaAssinaturas = snapshot.docs.map((doc) => {
+        const dataFirestore = doc.data().data;
+        return {
+          id: doc.id,
+          descricao: doc.data().descricao,
+          valor: doc.data().valor,
+          data: dataFirestore?.toDate?.() || new Date(),
+        };
+      });
 
       const ultimos7Dias = filtrarUltimos7Dias(listaAssinaturas).sort(
         (a, b) => b.data - a.data
@@ -42,13 +45,14 @@ function AssinaturasRecentes() {
   }, [uid]);
 
   function renderItem({ item }) {
+    const valorNum = Number(item.valor);
+    const valorFormatado = !isNaN(valorNum) ? valorNum.toFixed(2) : '0.00';
+
     return (
       <View style={styles.card}>
         <Text style={styles.descricao}>{item.descricao}</Text>
-        <Text style={styles.valor}>R$ {Number(item.valor).toFixed(2)}</Text>
-        <Text style={styles.data}>
-          {item.data.toLocaleDateString('pt-BR')}
-        </Text>
+        <Text style={styles.valor}>R$ {valorFormatado}</Text>
+        <Text style={styles.data}>{item.data.toLocaleDateString('pt-BR')}</Text>
       </View>
     );
   }
@@ -61,7 +65,7 @@ function AssinaturasRecentes() {
       ) : (
         <FlatList
           data={assinaturas}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 20 }}
         />
@@ -75,7 +79,7 @@ export default AssinaturasRecentes;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0F172A', // fundo escuro
+    backgroundColor: '#0F172A',
     padding: 16,
   },
   titulo: {
@@ -86,7 +90,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   card: {
-    backgroundColor: '#1E293B', // azul escuro
+    backgroundColor: '#1E293B',
     padding: 16,
     marginVertical: 8,
     borderRadius: 10,
@@ -101,13 +105,13 @@ const styles = StyleSheet.create({
   },
   valor: {
     fontSize: 16,
-    color: '#F87171', // vermelho suave
+    color: '#F87171',
     fontWeight: 'bold',
     marginTop: 4,
   },
   data: {
     fontSize: 14,
-    color: '#CBD5E1', // cinza claro
+    color: '#CBD5E1',
     marginTop: 6,
   },
   vazio: {

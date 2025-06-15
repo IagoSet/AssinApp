@@ -14,6 +14,10 @@ function AssinaturaItem({item}){
         });
     }
     
+    const valorFormatado = isNaN(Number(item.valor))
+    ? '0.00'
+    : Number(item.valor).toFixed(2);
+    
     return (
         <Pressable onPress={assinaturaPressHandler}>
             <View style={styles.itemContainer}>
@@ -24,7 +28,8 @@ function AssinaturaItem({item}){
                     <Text>{item.descricao}</Text>
                 </View>
                 <View style={styles.itemText}>
-                    <Text>R$ {item.valor}</Text>
+                <Text>R$ {valorFormatado}</Text>
+
                 </View>
                     
             </View>

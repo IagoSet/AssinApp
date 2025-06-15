@@ -1,14 +1,16 @@
 import { useEffect, useContext, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Pressable } from 'react-native';
 import AssinaturaSaida from '../components/assinaturas/AssinaturaSaida';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../src/firebaseConnection';
 import { AuthContext } from '../src/auth-contexto';
+import { useNavigation } from '@react-navigation/native'; // IMPORTAR
 
 function TodasAssinaturas() {
   const { uid } = useContext(AuthContext);
   const [assinaturas, setAssinaturas] = useState([]);
   const [carregando, setCarregando] = useState(true);
+  const navigation = useNavigation(); // HOOK PARA NAVEGAÇÃO
 
   useEffect(() => {
     if (!uid) return;
@@ -38,7 +40,16 @@ function TodasAssinaturas() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Todas as Assinaturas</Text>
+      <View style={styles.topBar}>
+        <Text style={styles.titulo}>Todas as Assinaturas</Text>
+        <Pressable
+          style={styles.botaoAparar}
+          onPress={() => navigation.navigate('ApararAssinaturas')}
+        >
+          <Text style={styles.textoBotao}>Remover Assinaturas</Text>
+        </Pressable>
+      </View>
+
       <AssinaturaSaida assinaturas={assinaturas} periodo={'Total'} />
     </View>
   );
@@ -50,12 +61,28 @@ const styles = StyleSheet.create({
     backgroundColor: '#0F172A',
     padding: 16,
   },
+  topBar: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
   titulo: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#F9FAFB',
-    textAlign: 'center',
-    marginVertical: 12,
+  },
+  botaoAparar: {
+    backgroundColor: '#2563EB', // azul
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    marginTop: 10,  
+  },
+  textoBotao: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   loadingContainer: {
     flex: 1,
@@ -67,13 +94,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: '#CBD5E1',
   },
-  caixa: {
-    backgroundColor: '#1E3A8A', // azul escuro
-    padding: 12,
-    marginVertical: 6,
-    borderRadius: 8,
-  },
-  
 });
 
 export default TodasAssinaturas;

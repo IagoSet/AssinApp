@@ -8,7 +8,7 @@ import { db } from '../src/firebaseConnection';
 function GerenciarAssinaturas({ route, navigation }) {
   const assinaturasId = route.params?.assinaturasId;
   const [data, setData] = useState(new Date());
-  const [valor, setValor] = useState('');
+  const [valor, setValor] = useState(0); // número
   const [descricao, setDescricao] = useState('');
   const [categoria, setCategoria] = useState('');
   const [showPicker, setShowPicker] = useState(false);
@@ -21,22 +21,27 @@ function GerenciarAssinaturas({ route, navigation }) {
     setData(currentDate);
   };
 
+  // Função para formatar e armazenar o valor numérico
   const handleChangeValor = (text) => {
+    // Remove tudo que não for número
     const onlyNumbers = text.replace(/[^\d]/g, '');
-    const number = parseFloat(onlyNumbers) / 100;
-    const formatted = number.toLocaleString('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    });
-    setValor(formatted);
+    // Divide por 100 para considerar centavos
+    const number = onlyNumbers ? parseFloat(onlyNumbers) / 100 : 0;
+    setValor(number);
   };
+
+  // Valor formatado para exibir no input
+  const valorFormatado = valor.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  });
 
   async function addAssinaturas() {
     try {
       await addDoc(collection(db, uid), {
         descricao,
         categoria,
-        valor,
+        valor,  // valor como número
         data,
       });
       Alert.alert('Sucesso', 'Assinatura cadastrada com sucesso!');
@@ -81,16 +86,13 @@ function GerenciarAssinaturas({ route, navigation }) {
       const docRef = doc(db, uid, assinaturasId);
       const snapshot = await getDoc(docRef);
       if (snapshot.exists()) {
-        setDescricao(snapshot.data().descricao);
-        setCategoria(snapshot.data().categoria || '');
-        setValor(snapshot.data().valor
-          ? snapshot.data().valor.toLocaleString('pt-BR', {
-              style: 'currency',
-              currency: 'BRL',
-            })
-          : ''
-        );
-        setData(snapshot.data().data.toDate());
+        const dataDoc = snapshot.data();
+        setDescricao(dataDoc.descricao);
+        setCategoria(dataDoc.categoria || '');
+        // Valor já vem como número, guardamos diretamente
+        setValor(dataDoc.valor || 0);
+        // data pode vir como Timestamp, converte para Date
+        setData(dataDoc.data?.toDate ? dataDoc.data.toDate() : new Date());
       } else {
         console.log('Nenhum documento encontrado!');
       }
@@ -104,7 +106,7 @@ function GerenciarAssinaturas({ route, navigation }) {
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>
-        {assinaturasId ? 'Editar Assinaturas' : 'Nova Assinatura'}
+        {assinaturasId ? 'Editar Assinatura' : 'Nova Assinatura'}
       </Text>
 
       <View style={styles.inputContainer}>
@@ -132,12 +134,12 @@ function GerenciarAssinaturas({ route, navigation }) {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Valor das Assinaturas</Text>
+        <Text style={styles.label}>Valor da Assinatura</Text>
         <TextInput
           style={styles.input}
-          keyboardType={'numeric'}
+          keyboardType="numeric"
           maxLength={12}
-          value={valor}
+          value={valorFormatado}
           placeholder="R$ 0,00"
           placeholderTextColor="#94A3B8"
           onChangeText={handleChangeValor}
@@ -145,7 +147,7 @@ function GerenciarAssinaturas({ route, navigation }) {
       </View>
 
       <View style={styles.inputContainer}>
-        <Text style={styles.label}>Data das Assinaturas</Text>
+        <Text style={styles.label}>Data da Assinatura</Text>
         <Pressable onPress={() => setShowPicker(true)} style={styles.input}>
           <Text style={styles.dateText}>{data.toLocaleDateString('pt-BR')}</Text>
         </Pressable>

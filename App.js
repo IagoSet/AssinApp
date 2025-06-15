@@ -8,6 +8,7 @@ import TodasAssinaturas from './screens/TodasAssinaturas';
 import { Ionicons } from '@expo/vector-icons';
 import IconButton from './components/IconButton';
 import AuthProvider from './src/auth-contexto';
+import ApararAssinaturas from './screens/ApararAssinaturas';
 
 export default function App() {
   const Tab = createBottomTabNavigator();
@@ -70,6 +71,16 @@ export default function App() {
             name="Assinaturas"
             component={BottonTabScreen}
             options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ApararAssinaturas"
+            component={ApararAssinaturas}
+            options={{
+            title: 'Aparar Assinaturas',
+            headerStyle: { backgroundColor: '#111827' },
+            headerTintColor: '#F9FAFB',
+            headerTitleStyle: { fontWeight: 'bold' },
+            }}
           />
           <Stack.Screen
             name="GerenciarAssinaturas"
