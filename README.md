@@ -43,3 +43,13 @@ Escaneie o QR Code com o aplicativo Expo Go ou use um emulador Android/iOS.
 
 Certifique-se de que seu dispositivo esteja na mesma rede Wi-Fi do computador onde o projeto está rodando.
 
+## ⚠️ Atenção
+
+Este projeto utiliza variáveis de ambiente para proteger informações sensíveis, como as credenciais do Firebase. Essas variáveis estão definidas em um arquivo `.env`, que está listado no `.gitignore` por motivos de segurança e **não está incluído neste repositório**.
+
+## 🔐 Para o professor
+
+Para rodar este projeto localmente, é necessário adicionar o arquivo `.env` na raiz do projeto com as credenciais corretas. Esse arquivo foi enviado separadamente para o senhor. 
+
+
+
